@@ -13,9 +13,9 @@ export default function Home() {
     for (let i = 0; i < 3; i++) {
       const cells = [];
       for (let j = 0; j < 3; j++) {
-        let index = i * 3 + j + 1
+        let index = i * 3 + j
         cells.push(<td
-          id={index.toString()} key={index} onClick={logMove}>{index}</td>);
+          id={index.toString()} key={index + 1} onClick={logMove}>{index + 1}</td>);
       }
       rows.push(<tr key={i}>{cells}</tr>);
     }
@@ -26,7 +26,9 @@ export default function Home() {
     <div className="h-full w-full bg-purple-300">
       <div className="container mx-auto" id="board">
         <table>
+          <tbody>
           {generateTable()}
+          </tbody>
         </table>
         <div className="container mx-auto" id="gameInfo">
           <div className="" id="p1Info"> P1 score</div>

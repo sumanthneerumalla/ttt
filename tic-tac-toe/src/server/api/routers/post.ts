@@ -1,11 +1,42 @@
 import { z } from "zod";
-
 import { createTRPCRouter, publicProcedure } from "~/server/api/trpc";
+import { EventEmitter } from 'events';
+import { observable } from '@trpc/server/observable';
+
+interface MyEvents {
+  addMove: (data: GameState) => void;
+}
+
+declare interface MyEventEmitter {
+  on<TEv extends keyof MyEvents>(event: TEv, listener: MyEvents[TEv]): this;
+  off<TEv extends keyof MyEvents>(event: TEv, listener: MyEvents[TEv]): this;
+  once<TEv extends keyof MyEvents>(event: TEv, listener: MyEvents[TEv]): this;
+  emit<TEv extends keyof MyEvents>(
+    event: TEv,
+    ...args: Parameters<MyEvents[TEv]>
+  ): boolean;
+}
+
+class MyEventEmitter extends EventEmitter { }
+
+// In a real app, you'd probably use Redis or something
+const ee = new MyEventEmitter();
+
+
+type GameState = {
+  board: number[][],
+  playerTurn: number
+};
 
 let post = {
   id: 1,
   name: "Hello World",
 };
+
+let game: GameState = {
+  board: [[0, 0, 0], [0, 0, 0], [0, 0, 0]],
+  playerTurn: 1,
+}
 
 export const postRouter = createTRPCRouter({
   hello: publicProcedure
@@ -26,7 +57,18 @@ export const postRouter = createTRPCRouter({
       return post;
     }),
 
-  getLatest: publicProcedure.query(() => {
-    return post;
+  getLatest: publicProcedure.subscription(() => {
+    return observable<GameState>((emit) => {
+      //this Event Handler sends latest game state over the socket
+      const onAdd = (data: GameState) => {
+        emit.next(data);
+      };
+
+      //register and deregister event handler on addMove
+      ee.on('addMove', onAdd);
+      return () => {
+        ee.off('addMove', onAdd);
+      };
+    });
   }),
 });
