@@ -23,7 +23,7 @@ class MyEventEmitter extends EventEmitter { }
 const ee = new MyEventEmitter();
 
 
-type GameState = {
+export interface GameState {
   board: number[][],
   playerTurn: number
 };
@@ -57,10 +57,21 @@ export const postRouter = createTRPCRouter({
       return post;
     }),
 
+    createMove: publicProcedure
+    .input(z.object({
+      board: z.array(z.array(z.number())),
+      playerTurn: z.number(),
+    }))
+    .mutation(async ({ input }) => {
+        console.log("here is the input: ", input)
+        ee.emit('addMove', input);
+    }),
+
   getLatest: publicProcedure.subscription(() => {
     return observable<GameState>((emit) => {
       //this Event Handler sends latest game state over the socket
       const onAdd = (data: GameState) => {
+        console.log("here is the data on emit: ", data)
         emit.next(data);
       };
 
