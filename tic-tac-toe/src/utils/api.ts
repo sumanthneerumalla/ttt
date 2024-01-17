@@ -4,12 +4,25 @@
  *
  * We also create a few inference helpers for input and output types.
  */
-import { httpBatchLink, loggerLink } from "@trpc/client";
+import { httpBatchLink,
+   loggerLink,
+   wsLink, // ADD
+   createWSClient, // ADD 
+  } from "@trpc/client";
 import { createTRPCNext } from "@trpc/next";
 import { type inferRouterInputs, type inferRouterOutputs } from "@trpc/server";
 import superjson from "superjson";
 
 import { type AppRouter } from "~/server/api/root";
+
+// ADD: create persistent WebSocket connection
+const wssLink = wsLink<AppRouter>({
+  client: createWSClient({
+    url: "ws://localhost:3001",
+    onOpen: () => console.info("ws con established"),
+    onClose: () => console.info("ws con closed"),
+  }),
+});
 
 const getBaseUrl = () => {
   if (typeof window !== "undefined") return ""; // browser should use relative url
@@ -42,6 +55,7 @@ export const api = createTRPCNext<AppRouter>({
         httpBatchLink({
           url: `${getBaseUrl()}/api/trpc`,
         }),
+        wssLink, //ADD websocket link
       ],
     };
   },

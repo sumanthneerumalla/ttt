@@ -9,7 +9,7 @@
 	// "features": {},
 
 	// Use 'forwardPorts' to make a list of ports inside the container available locally.
-	"forwardPorts": [3000],
+	"forwardPorts": [3000,3001],
 
 	// Use 'postCreateCommand' to run commands after the container is created.
 	"postCreateCommand": "cd tic-tac-toe; npm install",
@@ -22,7 +22,11 @@
 		"3000": {
 		  "label": "Application",
 		  "onAutoForward": "openPreview"
-		}
+		},
+		"3001": {
+			"label": "Application",
+			"onAutoForward": "openPreview"
+		  }
 	  }	  
 	// Configure tool-specific properties.
 	// "customizations": {},
