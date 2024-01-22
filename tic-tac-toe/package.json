@@ -5,7 +5,9 @@
   "type": "module",
   "scripts": {
     "build": "next build",
-    "dev": "next dev",
+    "dev:next": "next dev",
+    "dev:wss": "cross-env PORT=3001 tsx watch src/server/wss.ts --tsconfig tsconfig.server.json",
+    "dev": "run-p dev:*",
     "lint": "next lint",
     "start": "next start"
   },
@@ -20,9 +22,11 @@
     "react": "18.2.0",
     "react-dom": "18.2.0",
     "superjson": "^2.2.1",
+    "ws": "^8.16.0",
     "zod": "^3.22.4"
   },
   "devDependencies": {
+    "@types/ws": "^8.5.10",
     "@types/eslint": "^8.44.7",
     "@types/node": "^18.17.0",
     "@types/react": "^18.2.37",

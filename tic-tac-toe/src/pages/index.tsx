@@ -14,7 +14,7 @@ export default function Home() {
     for (let i = 0; i < 3; i++) {
       const cells = [];
       for (let j = 0; j < 3; j++) {
-        let index = i * 3 + j
+        const index = i * 3 + j
         cells.push(<td
           id={index.toString()} key={index + 1} onClick={logMove}>{index + 1}</td>);
       }
@@ -44,11 +44,11 @@ export default function Home() {
 
   };
 
-  api.post.getLatest.useSubscription(undefined, {
-    onData(data) {
-      setRemoteGameState(data);
-    },
-  });
+    api.post.getLatest.useSubscription(undefined, {
+      onData(data) {
+        setRemoteGameState(data);
+      },
+    });
 
 
   return (

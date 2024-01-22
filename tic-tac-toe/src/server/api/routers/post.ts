@@ -63,7 +63,6 @@ export const postRouter = createTRPCRouter({
       playerTurn: z.number(),
     }))
     .mutation(async ({ input }) => {
-        console.log("here is the input: ", input)
         ee.emit('addMove', input);
     }),
 
@@ -71,7 +70,6 @@ export const postRouter = createTRPCRouter({
     return observable<GameState>((emit) => {
       //this Event Handler sends latest game state over the socket
       const onAdd = (data: GameState) => {
-        console.log("here is the data on emit: ", data)
         emit.next(data);
       };
 

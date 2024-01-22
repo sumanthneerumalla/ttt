@@ -12,6 +12,8 @@ import { httpBatchLink,
 import { createTRPCNext } from "@trpc/next";
 import { type inferRouterInputs, type inferRouterOutputs } from "@trpc/server";
 import superjson from "superjson";
+import type { NextPageContext } from 'next';
+import getConfig from 'next/config';
 
 import { type AppRouter } from "~/server/api/root";
 
@@ -30,9 +32,19 @@ const getBaseUrl = () => {
   return `http://localhost:${process.env.PORT ?? 3000}`; // dev SSR should use localhost
 };
 
+
+function getEndingLink(ctx: NextPageContext | undefined) {
+  if (typeof window === 'undefined') {
+    return httpBatchLink({
+      url: `${getBaseUrl()}/api/trpc`,
+    });
+  }
+  return wssLink;
+}
+
 /** A set of type-safe react-query hooks for your tRPC API. */
 export const api = createTRPCNext<AppRouter>({
-  config() {
+  config({ctx}) {
     return {
       /**
        * Transformer used for data de-serialization from the server.
@@ -52,10 +64,7 @@ export const api = createTRPCNext<AppRouter>({
             process.env.NODE_ENV === "development" ||
             (opts.direction === "down" && opts.result instanceof Error),
         }),
-        httpBatchLink({
-          url: `${getBaseUrl()}/api/trpc`,
-        }),
-        wssLink, //ADD websocket link
+        getEndingLink(ctx),
       ],
     };
   },

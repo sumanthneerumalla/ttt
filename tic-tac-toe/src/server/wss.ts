@@ -1,6 +1,6 @@
-import {WebSocketServer} from "ws"
 import { applyWSSHandler } from "@trpc/server/adapters/ws"
-import {appRouter} from "src/server/api/root"
+import { WebSocketServer } from "ws"
+import { appRouter } from "src/server/api/root"
 import { createTRPCContext } from "src/server/api/trpc"
 
 const wss = new WebSocketServer({
@@ -16,10 +16,10 @@ const handler = applyWSSHandler({
 //Todo: remove redundant client connections and close sockets if client doesn't ping back
 wss.on("connection", (ws) => {
     const fakeClientId = Math.floor(Math.random() * 1000)
-  console.log(`Connection (${wss.clients.size})`);
+    console.log(`Connection (${wss.clients.size})`);
     console.info(`➕➕ client_connected ${fakeClientId} - Connection (${wss.clients.size})`)
     ws.once("close", () => {
-        console.info(`cliend_close ${fakeClientId} ➖➖ Connection (${wss.clients.size})`);
+        console.info(`➖➖ client_closed ${fakeClientId} - Connection (${wss.clients.size})`);
     })
 })
 
@@ -30,4 +30,4 @@ process.on('SIGTERM', () => {
     console.log('SIGTERM');
     handler.broadcastReconnectNotification();
     wss.close();
-  });
+});
