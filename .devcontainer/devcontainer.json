@@ -1,7 +1,7 @@
 // For format details, see https://aka.ms/devcontainer.json. For config options, see the
 // README at: https://github.com/devcontainers/templates/tree/main/src/typescript-node
 {
-	"name": "Node.js & TypeScript",
+	"name": "Tic Tac Toe with Websockets",
 	// Or use a Dockerfile or Docker Compose file. More info: https://containers.dev/guide/dockerfile
 	"image": "mcr.microsoft.com/devcontainers/typescript-node:1-20-bullseye",
 
@@ -12,10 +12,10 @@
 	"forwardPorts": [3000,3001],
 
 	// Use 'postCreateCommand' to run commands after the container is created.
-	"postCreateCommand": "cd tic-tac-toe; npm install",
+	"postCreateCommand": "pnpm i; pnpm dx",
 
 	"postAttachCommand": {
-		"server": "cd tic-tac-toe;npm run dev"
+		"server": "pnpm run dev"
 	  },
 
 	  "portsAttributes": {

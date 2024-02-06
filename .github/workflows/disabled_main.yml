@@ -1,3 +1,5 @@
+#rename file as main.yml to enable
+
 name: E2E-testing
 on: [push]
 jobs:
