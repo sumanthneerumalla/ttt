@@ -57,7 +57,7 @@ process.on('SIGTERM', () => {
   clearInterval(interval);
 });
 
-let game: GameState = {
+const game: GameState = {
   board: [
     [0, 0, 0],
     [0, 0, 0],
@@ -126,7 +126,7 @@ export const postRouter = router({
       let nextCursor: typeof cursor | null = null;
       if (items.length > take) {
         const prev = items.shift();
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+
         nextCursor = prev!.createdAt;
       }
       return {

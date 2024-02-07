@@ -40,6 +40,7 @@ yarn-error.log*
 *.db
 *.db-journal
 
+# generated files
 dist/
-
 *.tsbuildinfo
+.eslintcache
