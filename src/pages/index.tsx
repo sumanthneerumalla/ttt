@@ -4,6 +4,8 @@ import { signIn, signOut, useSession } from 'next-auth/react';
 import Head from 'next/head';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import TicTacToeTable from 'components/TicTacToeTable';
+import ChatWindow from 'components/chatWindow';
+import LeftPane from 'components/leftPane';
 
 function AddMessageForm({ onMessagePost }: { onMessagePost: () => void }) {
   const addPost = trpc.post.add.useMutation();
@@ -105,79 +107,8 @@ function AddMessageForm({ onMessagePost }: { onMessagePost: () => void }) {
 }
 
 export default function IndexPage() {
-  const postsQuery = trpc.post.infinite.useInfiniteQuery(
-    {},
-    {
-      getNextPageParam: (d) => d.nextCursor,
-    },
-  );
-  const utils = trpc.useUtils();
-  const { hasNextPage, isFetchingNextPage, fetchNextPage } = postsQuery;
-
-  // list of messages that are rendered
-  const [messages, setMessages] = useState(() => {
-    const msgs = postsQuery.data?.pages.map((page) => page.items).flat();
-    return msgs;
-  });
-  type Post = NonNullable<typeof messages>[number];
   const { data: session } = useSession();
   const userName = session?.user?.name;
-  const scrollTargetRef = useRef<HTMLDivElement>(null);
-
-  // fn to add and dedupe new messages onto state
-  const addMessages = useCallback((incoming?: Post[]) => {
-    setMessages((current) => {
-      const map: Record<Post['id'], Post> = {};
-      for (const msg of current ?? []) {
-        map[msg.id] = msg;
-      }
-      for (const msg of incoming ?? []) {
-        map[msg.id] = msg;
-      }
-      return Object.values(map).sort(
-        (a, b) => a.createdAt.getTime() - b.createdAt.getTime(),
-      );
-    });
-  }, []);
-
-  // when new data from `useInfiniteQuery`, merge with current state
-  useEffect(() => {
-    const msgs = postsQuery.data?.pages.map((page) => page.items).flat();
-    addMessages(msgs);
-  }, [postsQuery.data?.pages, addMessages]);
-
-  const scrollToBottomOfList = useCallback(() => {
-    if (scrollTargetRef.current == null) {
-      return;
-    }
-
-    scrollTargetRef.current.scrollIntoView({
-      behavior: 'smooth',
-      block: 'end',
-    });
-  }, [scrollTargetRef]);
-  useEffect(() => {
-    scrollToBottomOfList();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-  // subscribe to new posts and add
-  trpc.post.onAdd.useSubscription(undefined, {
-    onData(post) {
-      addMessages([post]);
-    },
-    onError(err) {
-      console.error('Subscription error:', err);
-      // we might have missed a message - invalidate cache
-      utils.post.infinite.invalidate();
-    },
-  });
-
-  const [currentlyTyping, setCurrentlyTyping] = useState<string[]>([]);
-  trpc.post.whoIsTyping.useSubscription(undefined, {
-    onData(data) {
-      setCurrentlyTyping(data);
-    },
-  });
 
   return (
     <>
@@ -186,51 +117,7 @@ export default function IndexPage() {
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <div className="flex h-screen flex-col md:flex-row">
-        <section className="flex w-full flex-col bg-gray-800 md:w-72">
-          <div className="flex-1 overflow-y-hidden">
-            <div className="flex h-full flex-col divide-y divide-gray-700">
-              <header className="p-4">
-                <h1 className="text-3xl font-bold text-gray-50">Tic Tac Toe</h1>
-                <p className="text-sm text-gray-400">
-                  Built using TRPC + NextJs + Prisma + NextAuth
-                  <br />
-                  <a
-                    className="text-gray-100 underline"
-                    href="https://github.com/sumanthneerumalla/ttt"
-                    target="_blank"
-                    rel="noreferrer"
-                  >
-                    View Source on GitHub
-                  </a>
-                </p>
-              </header>
-              <div className="hidden flex-1 space-y-6 overflow-y-auto p-4 text-gray-400 md:block">
-                {userName && (
-                  <article>
-                    <h2 className="text-lg text-gray-200">User information</h2>
-                    <ul className="space-y-2">
-                      <li className="text-lg">
-                        You&apos;re{' '}
-                        <input
-                          id="name"
-                          name="name"
-                          type="text"
-                          disabled
-                          className="bg-transparent"
-                          value={userName}
-                        />
-                      </li>
-                      <li>
-                        <button onClick={() => signOut()}>Sign Out</button>
-                      </li>
-                    </ul>
-                  </article>
-                )}
-              </div>
-            </div>
-          </div>
-          <div className="hidden h-16 shrink-0 md:block"></div>
-        </section>
+        <LeftPane/>
 
         <div className="flex-1 md:h-screen">
           <section className="flex h-full flex-col justify-end space-y-4 bg-purple-700 p-4">
@@ -238,69 +125,7 @@ export default function IndexPage() {
           </section>
         </div>
 
-        <div className="flex-1 overflow-y-hidden md:h-screen">
-          <section className="flex h-full flex-col justify-end space-y-4 bg-gray-700 p-4">
-            <div className="space-y-4 overflow-y-auto">
-              <button
-                data-testid="loadMore"
-                onClick={() => fetchNextPage()}
-                disabled={!hasNextPage || isFetchingNextPage}
-                className="rounded bg-indigo-500 px-4 py-2 text-white disabled:opacity-40"
-              >
-                {isFetchingNextPage
-                  ? 'Loading more...'
-                  : hasNextPage
-                  ? 'Load More'
-                  : 'Nothing more to load'}
-              </button>
-              <div className="space-y-4">
-                {messages?.map((item) => (
-                  <article key={item.id} className=" text-gray-50">
-                    <header className="flex space-x-2 text-sm">
-                      <h3 className="text-base">
-                        {item.source === 'RAW' ? (
-                          item.name
-                        ) : (
-                          <a
-                            href={`https://github.com/${item.name}`}
-                            target="_blank"
-                            rel="noreferrer"
-                          >
-                            {item.name}
-                          </a>
-                        )}
-                      </h3>
-                      <span className="text-gray-500">
-                        {new Intl.DateTimeFormat('en-GB', {
-                          dateStyle: 'short',
-                          timeStyle: 'short',
-                        }).format(item.createdAt)}
-                      </span>
-                    </header>
-                    <p className="whitespace-pre-line text-xl leading-tight">
-                      {item.text}
-                    </p>
-                  </article>
-                ))}
-                <div ref={scrollTargetRef}></div>
-              </div>
-            </div>
-            <div className="w-full">
-              <AddMessageForm onMessagePost={() => scrollToBottomOfList()} />
-              <p className="h-2 italic text-gray-400">
-                {currentlyTyping.length
-                  ? `${currentlyTyping.join(', ')} typing...`
-                  : ''}
-              </p>
-            </div>
-
-            {/* {process.env.NODE_ENV !== 'production' && (
-              <div className="hidden md:block">
-                <ReactQueryDevtools initialIsOpen={false} />
-              </div>
-            )} */}
-          </section>
-        </div>
+        <ChatWindow/>
       </div>
     </>
   );
