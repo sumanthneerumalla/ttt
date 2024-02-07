@@ -3,16 +3,7 @@ import { trpc } from '../utils/trpc';
 import { signIn, signOut, useSession } from 'next-auth/react';
 import Head from 'next/head';
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { GameState } from '../server/routers/post';
-
-let game: GameState = {
-  board: [
-    [0, 1, 2],
-    [0, 0, 0],
-    [0, 0, 8],
-  ],
-  playerTurn: 1,
-};
+import TicTacToeTable from 'components/TicTacToeTable';
 
 function AddMessageForm({ onMessagePost }: { onMessagePost: () => void }) {
   const addPost = trpc.post.add.useMutation();
@@ -188,36 +179,6 @@ export default function IndexPage() {
     },
   });
 
-  const logMove = (rowIndex: number, cellIndex: number) => {
-    console.log(rowIndex, cellIndex);
-  };
-
-  function TicTacToeTable({ game }: { game: GameState }) {
-    return (
-      <table className="tic-tac-toe-table flex justify-center items-center h-screen">
-        <tbody>
-          {game.board.map((row, rowIndex) => (
-            <tr key={rowIndex}>
-              {row.map((cell, cellIndex) => (
-                <td key={cellIndex} className="tic-tac-toe-cell">
-                  <button
-                    onClick={() => logMove(rowIndex, cellIndex)}
-                    className="bg-gray-200 text-gray-700 font-semibold py-2 px-4 rounded-full shadow-md hover:shadow-lg"
-                  >
-                    {cell}
-                  </button>
-                </td>
-              ))}
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    );
-  }
-
-  const [localGameState, setLocalGameState] = useState<GameState>(game);
-  const [remoteGameState, setRemoteGameState] = useState<GameState>(game);
-
   return (
     <>
       <Head>
@@ -273,7 +234,7 @@ export default function IndexPage() {
 
         <div className="flex-1 md:h-screen">
           <section className="flex h-full flex-col justify-end space-y-4 bg-purple-700 p-4">
-            <TicTacToeTable game={game} />
+            <TicTacToeTable />
           </section>
         </div>
 
