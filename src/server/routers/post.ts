@@ -8,17 +8,26 @@ import { EventEmitter } from 'events';
 import { prisma } from '../prisma';
 import { z } from 'zod';
 import { authedProcedure, publicProcedure, router } from '../trpc';
+import { isMoveAllowed, submitMove } from '../../utils/tttUtils';
 
 type Board = number[][];
 export interface GameState {
   board: Board;
-  playerTurn: number;
+  turn: number;
+  players: string[];
   metadata?: any;
 }
+
+export interface GameMove {
+  gameId: number;
+  xMove: number;
+  yMove: number;
+}
+
 interface MyEvents {
   add: (data: Post) => void;
   isTypingUpdate: () => void;
-  addMove: (data: GameState) => void;
+  addMove: (data: GameMove) => void;
 }
 declare interface MyEventEmitter {
   on<TEv extends keyof MyEvents>(event: TEv, listener: MyEvents[TEv]): this;
@@ -63,7 +72,8 @@ const game: GameState = {
     [0, 0, 0],
     [0, 0, 0],
   ],
-  playerTurn: 1,
+  turn: 1,
+  players: ['a', 'b'],
 };
 
 export const postRouter = router({
@@ -76,6 +86,7 @@ export const postRouter = router({
     )
     .mutation(async ({ input, ctx }) => {
       const { name } = ctx.user;
+      console.log('message input from : ', name);
       const post = await prisma.post.create({
         data: {
           ...input,
@@ -168,19 +179,26 @@ export const postRouter = router({
   createMove: publicProcedure
     .input(
       z.object({
-        board: z.array(z.array(z.number())),
-        playerTurn: z.number(),
+        xMove: z.number(),
+        yMove: z.number(),
+        gameId: z.number(),
       }),
     )
-    .mutation(async ({ input }) => {
+    .mutation(async ({ input, ctx }) => {
+      //use the context to get the user id and validate the move they made
+      //modify the game State and then send it back to the user
+      if (ctx) {
+        console.log(input);
+      }
+
       ee.emit('addMove', input);
     }),
 
   gameSubscription: publicProcedure.subscription(() => {
     return observable<GameState>((emit) => {
       //this Event Handler sends latest game state over the socket
-      const onAdd = (data: GameState) => {
-        emit.next(data);
+      const onAdd = (data: GameMove) => {
+        emit.next(game);
       };
 
       //register and deregister event handler on addMove

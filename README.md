@@ -18,8 +18,7 @@ Try demo http://websockets.trpc.io/
 ## Setup
 
 ```bash
-pnpm create next-app --example https://github.com/trpc/trpc --example-path examples/next-prisma-websockets-starter trpc-prisma-websockets-starter
-cd trpc-prisma-websockets-starter
+cd ttt
 pnpm i
 pnpm dx
 ```
@@ -76,4 +75,4 @@ pnpm test:e2e   # runs e2e tests
 
 ---
 
-Created by [@alexdotjs](https://twitter.com/alexdotjs).
+Created by [@sumanthneerumalla]. Built on a template from the trpc project https://github.com/trpc/examples-next-prisma-websockets-starter
