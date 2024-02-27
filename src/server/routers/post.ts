@@ -2,7 +2,7 @@
  *
  * This is an example router, you can delete this file and then update `../pages/api/trpc/[trpc].tsx`
  */
-import type { Post } from '@prisma/client';
+import type { Post,Game } from '@prisma/client';
 import { observable } from '@trpc/server/observable';
 import { EventEmitter } from 'events';
 import { prisma } from '../prisma';
@@ -176,7 +176,7 @@ export const postRouter = router({
     });
   }),
 
-  createMove: publicProcedure
+  createMove: authedProcedure
     .input(
       z.object({
         xMove: z.number(),
@@ -208,4 +208,24 @@ export const postRouter = router({
       };
     });
   }),
+
+  gameEntry: authedProcedure
+    .input(
+      z.object({
+        gameState: z.string(),
+        gameId: z.optional(z.number()),
+      }),
+    )
+    .mutation(async ({ input, ctx }) => {
+      const { name } = ctx.user;
+      console.log('new game created by : ', name);
+      console.log('input is: ', input);
+      const post = await prisma.game.create({
+        data: {
+          gameData: input,
+        },
+      });
+
+      return post;
+    }),
 });

@@ -28,3 +28,10 @@ model Post {
   createdAt DateTime @unique @default(now())
   updatedAt DateTime @unique @default(now())
 }
+
+model Game {
+  id Int @id @unique @default(autoincrement())
+  gameData Json
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+}
