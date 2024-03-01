@@ -14,6 +14,7 @@ type Board = number[][];
 export interface GameState {
   board: Board;
   turn: number;
+  nextPlayer: string;
   players: string[];
   metadata?: any;
 }
@@ -74,6 +75,7 @@ const game: GameState = {
   ],
   turn: 1,
   players: ['a', 'b'],
+  nextPlayer: 'a',
 };
 
 export const postRouter = router({
@@ -188,7 +190,14 @@ export const postRouter = router({
       //use the context to get the user id and validate the move they made
       //modify the game State and then send it back to the user
       if (ctx) {
-        console.log(input);
+        // console.log(input);
+        const move: GameMove = {
+          xMove: input.xMove,
+          yMove: input.yMove,
+          gameId: input.gameId,
+        };
+        const userId = ctx.user.name;
+        const allowed = await isMoveAllowed(move, userId);
       }
 
       ee.emit('addMove', input);
@@ -198,7 +207,7 @@ export const postRouter = router({
     return observable<GameState>((emit) => {
       //this Event Handler sends latest game state over the socket
       const onAdd = (data: GameMove) => {
-        emit.next(game);
+        emit.next(game); //todo: only send the right game object back
       };
 
       //register and deregister event handler on addMove
@@ -213,7 +222,7 @@ export const postRouter = router({
     .input(
       z.object({
         gameState: z.string(),
-        gameId: z.optional(z.number()),
+        gameId: z.optional(z.number()), //if provided use that, otherwise let prisma create a new one
       }),
     )
     .mutation(async ({ input, ctx }) => {

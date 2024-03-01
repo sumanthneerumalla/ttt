@@ -1,3 +1,29 @@
+# 02/29/23
+- I need to construct a gameMove object again on the createMove endpoint and validate it against the game object based on game id
+    - sending each button press using an event handler that calls a trpc mutate now. sends a gameMove obj
+    - reconstructing that on the backend now
+    - took a long time to get rid of annoying eslint pickiness, just added an exception and stuck with keeping gameState as string
+    - i can validate whether the sent in move is valid or not now
+- next steps are to submit the move and update the new gameState accordingly. After that...deal with supporting a 3 games alternating the starting player. Need either game room or tournament data model
+
+# 02/28/23
+-default game object lets test user play a game
+-Things i should be able to do now:
+    - view any game object. I should create a page that takes a game id and renders that game from the database
+    - submit a game move to any game, but apply it only after validation. I'll do this one first then i'm free to implement the other thing.
+        - after i do this i need to look into getting the subscription to work. Might get complicated bc i dont know if each client session has its own separate subscription. will deal with it when it comes time
+        - Spent way too much time trying to infer zod schema from typescript GameMove definition automatically. I'll leave that as is on the trpc endpoint and instead just create another GameMove object that i can pass around as needed. Why cant zod just take the interface or type definition instead of making me redefine in zod again??!
+        - I can fetch the game object now
+            - but instead of storing the game state as a json string, i should just try and store it as a gameObject to begin with
+            - will do this when i get back
+
+
+# 02/27/23
+- now that i have game objects on the db, I can check if a user sending a move is allowed to make a move for that game or not
+- later i'll revisit this game creation endpoint and create a separate page that lets me create custom games. That page will show who's online and create a match with that player. Will need to add some authorization where one of the players in the new game must be the player that created the game request
+- I should be able to implement a full game for this next leg of the project
+- Didn't make much progress on these ideas
+
 # 02/26/23
 - continuing to work on db model and approach.
     - i need to made a db table that had game id with username array in it

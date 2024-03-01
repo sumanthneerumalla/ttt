@@ -9,7 +9,13 @@ const defaultGame: GameState = {
     [0, 0, 0],
   ],
   turn: 1,
-  players: ['a', 'b'],
+  players: ['test', 'Sumanth'],
+};
+
+const defaultMove: GameMove = {
+  gameId: 1,
+  xMove: 1,
+  yMove: 1,
 };
 
 export default function TicTacToeTable() {
@@ -22,6 +28,16 @@ export default function TicTacToeTable() {
 
   const makeMove = trpc.post.createMove.useMutation();
 
+  //event handler for sending button presses to backend
+  function cellPress(rowIndex: number, cellIndex: number) {
+    console.log(rowIndex, cellIndex);
+    makeMove.mutate({
+      ...defaultMove,
+      xMove: rowIndex,
+      yMove: cellIndex,
+    });
+  }
+
   return (
     <div className="flex-1 md:h-screen">
       <section className="flex h-full flex-col justify-end space-y-4 bg-purple-700 p-4">
@@ -33,13 +49,7 @@ export default function TicTacToeTable() {
                   <td key={cellIndex} className="tic-tac-toe-cell">
                     <button
                       className="bg-gray-200 text-gray-700 font-semibold py-2 px-4 rounded-full shadow-md hover:shadow-lg"
-                      onClick={() =>
-                        makeMove.mutate({
-                          xMove: cellIndex,
-                          yMove: rowIndex,
-                          gameId: 1,
-                        })
-                      }
+                      onClick={() => cellPress(rowIndex, cellIndex)}
                     >
                       {cellVal}
                     </button>
@@ -50,7 +60,7 @@ export default function TicTacToeTable() {
           </tbody>
         </table>
         <div>
-          <MyButton />
+          <NgButton />
         </div>
       </section>
       {
@@ -60,7 +70,7 @@ export default function TicTacToeTable() {
   );
 }
 
-function MyButton() {
+function NgButton() {
   const createGame = trpc.post.gameEntry.useMutation();
 
   const gameAsJson = JSON.stringify(defaultGame);
@@ -77,7 +87,7 @@ function MyButton() {
       className="bg-gray-200 text-gray-700 font-semibold py-2 px-4 rounded-full shadow-md hover:shadow-lg"
       onClick={clickFunction}
     >
-      Test Button
+      Create a new test game
     </button>
   );
 }
