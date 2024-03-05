@@ -1,3 +1,16 @@
+# 03/04/23
+- resuming win detection with the algorithm from stack overflow
+- detects wins now, can render and play a game till a win is detected
+- added conditional rendering of X or O depending on the moves stored in the board
+- need to display the winner on the tic tac toe component next, and send updates over sockets
+- after that i can try and finalize auth
+
+# 02/29/23
+- a little refactoring before i start writing the game state back into the db
+- going to use an upsert to update a game id if provided, otherwise creates a new game
+- need to finish function that checks if a round is completed, or implement a countdown for rounds
+- found this nifty little technique for win detection: https://stackoverflow.com/a/18668901
+
 # 02/29/23
 - I need to construct a gameMove object again on the createMove endpoint and validate it against the game object based on game id
     - sending each button press using an event handler that calls a trpc mutate now. sends a gameMove obj

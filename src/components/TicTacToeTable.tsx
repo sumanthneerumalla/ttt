@@ -8,8 +8,10 @@ const defaultGame: GameState = {
     [0, 0, 0],
     [0, 0, 0],
   ],
-  turn: 1,
-  players: ['test', 'Sumanth'],
+  turn: 0,
+  players: ['test', 'test'],
+  nextPlayer: 'test',
+  roundCompleted: false,
 };
 
 const defaultMove: GameMove = {
@@ -30,12 +32,21 @@ export default function TicTacToeTable() {
 
   //event handler for sending button presses to backend
   function cellPress(rowIndex: number, cellIndex: number) {
-    console.log(rowIndex, cellIndex);
-    makeMove.mutate({
-      ...defaultMove,
-      xMove: rowIndex,
-      yMove: cellIndex,
-    });
+    console.log('move on : ', rowIndex, ',', cellIndex);
+    makeMove.mutate(
+      {
+        ...defaultMove,
+        xMove: rowIndex,
+        yMove: cellIndex,
+      },
+      {
+        onSuccess: (result) => {
+          if (result) {
+            setRemoteGameState(result);
+          }
+        },
+      },
+    );
   }
 
   return (
@@ -48,10 +59,10 @@ export default function TicTacToeTable() {
                 {row.map((cellVal, cellIndex) => (
                   <td key={cellIndex} className="tic-tac-toe-cell">
                     <button
-                      className="bg-gray-200 text-gray-700 font-semibold py-2 px-4 rounded-full shadow-md hover:shadow-lg"
+                      className="w-12 h-12 bg-gray-200 text-gray-700 font-semibold py-2 px-4 rounded-full shadow-md hover:shadow-lg"
                       onClick={() => cellPress(rowIndex, cellIndex)}
                     >
-                      {cellVal}
+                      {cellVal === 1 ? 'O' : cellVal === -1 ? 'X' : null}
                     </button>
                   </td>
                 ))}

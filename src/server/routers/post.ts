@@ -8,7 +8,7 @@ import { EventEmitter } from 'events';
 import { prisma } from '../prisma';
 import { z } from 'zod';
 import { authedProcedure, publicProcedure, router } from '../trpc';
-import { isMoveAllowed, submitMove } from '../../utils/tttUtils';
+import { processMove } from '../../utils/tttUtils';
 
 type Board = number[][];
 export interface GameState {
@@ -16,6 +16,7 @@ export interface GameState {
   turn: number;
   nextPlayer: string;
   players: string[];
+  roundCompleted: boolean;
   metadata?: any;
 }
 
@@ -76,6 +77,7 @@ const game: GameState = {
   turn: 1,
   players: ['a', 'b'],
   nextPlayer: 'a',
+  roundCompleted: false,
 };
 
 export const postRouter = router({
@@ -197,7 +199,7 @@ export const postRouter = router({
           gameId: input.gameId,
         };
         const userId = ctx.user.name;
-        const allowed = await isMoveAllowed(move, userId);
+        return await processMove(move, userId);
       }
 
       ee.emit('addMove', input);
@@ -229,9 +231,13 @@ export const postRouter = router({
       const { name } = ctx.user;
       console.log('new game created by : ', name);
       console.log('input is: ', input);
-      const post = await prisma.game.create({
-        data: {
-          gameData: input,
+      const post = await prisma.game.upsert({
+        where: { id: input.gameId }, // Replace `postId` with the actual id
+        update: {
+          gameData: { gameState: input.gameState },
+        },
+        create: {
+          gameData: { gameState: input.gameState },
         },
       });
 
