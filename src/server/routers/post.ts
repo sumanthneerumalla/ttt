@@ -2,7 +2,7 @@
  *
  * This is an example router, you can delete this file and then update `../pages/api/trpc/[trpc].tsx`
  */
-import type { Post,Game } from '@prisma/client';
+import type { Post } from '@prisma/client';
 import { observable } from '@trpc/server/observable';
 import { EventEmitter } from 'events';
 import { prisma } from '../prisma';
@@ -16,7 +16,7 @@ export interface GameState {
   turn: number;
   nextPlayer: string;
   players: string[];
-  roundCompleted: boolean;
+  winningPlayer: string | null;
   metadata?: any;
 }
 
@@ -77,7 +77,6 @@ const game: GameState = {
   turn: 1,
   players: ['a', 'b'],
   nextPlayer: 'a',
-  roundCompleted: false,
 };
 
 export const postRouter = router({
@@ -220,25 +219,34 @@ export const postRouter = router({
     });
   }),
 
+  // Enters a hard coded game object into the database, overwites if game id provided
+  // Otherwise it just makes a new game object using the next game id
   gameEntry: authedProcedure
     .input(
       z.object({
         gameState: z.string(),
         gameId: z.optional(z.number()), //if provided use that, otherwise let prisma create a new one
+        winningPlayer: z.optional(z.union([z.string(), z.null()])),
       }),
     )
     .mutation(async ({ input, ctx }) => {
       const { name } = ctx.user;
       console.log('new game created by : ', name);
       console.log('input is: ', input);
+
+      const gameObjToStore = {
+        gameData: {
+          gameState: input.gameState,
+        },
+        winningPlayer: Boolean(input.winningPlayer)
+          ? input.winningPlayer
+          : null,
+      };
+
       const post = await prisma.game.upsert({
-        where: { id: input.gameId }, // Replace `postId` with the actual id
-        update: {
-          gameData: { gameState: input.gameState },
-        },
-        create: {
-          gameData: { gameState: input.gameState },
-        },
+        where: { id: input.gameId },
+        update: gameObjToStore,
+        create: gameObjToStore,
       });
 
       return post;

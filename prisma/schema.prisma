@@ -34,4 +34,5 @@ model Game {
   gameData Json
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now()) @updatedAt
+  winningPlayer String?
 }

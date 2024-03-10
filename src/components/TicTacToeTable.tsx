@@ -11,7 +11,7 @@ const defaultGame: GameState = {
   turn: 0,
   players: ['test', 'test'],
   nextPlayer: 'test',
-  roundCompleted: false,
+  winningPlayer: null,
 };
 
 const defaultMove: GameMove = {
@@ -51,25 +51,35 @@ export default function TicTacToeTable() {
 
   return (
     <div className="flex-1 md:h-screen">
-      <section className="flex h-full flex-col justify-end space-y-4 bg-purple-700 p-4">
-        <table className="tic-tac-toe-table flex justify-center items-center h-screen">
-          <tbody>
-            {remoteGameState.board.map((row, rowIndex) => (
-              <tr key={rowIndex}>
-                {row.map((cellVal, cellIndex) => (
-                  <td key={cellIndex} className="tic-tac-toe-cell">
-                    <button
-                      className="w-12 h-12 bg-gray-200 text-gray-700 font-semibold py-2 px-4 rounded-full shadow-md hover:shadow-lg"
-                      onClick={() => cellPress(rowIndex, cellIndex)}
-                    >
-                      {cellVal === 1 ? 'O' : cellVal === -1 ? 'X' : null}
-                    </button>
-                  </td>
-                ))}
-              </tr>
-            ))}
-          </tbody>
-        </table>
+      <section className="flex h-full flex-col bg-purple-700 p-4">
+        <div className="flex flex-col space-y-4 justify-center items-center h-screen">
+          <div className="turn-info text-gray-300 flex space-x-4">
+            <div className="border-2 border-grey rounded-lg p-4  ">
+              X - {remoteGameState.players[0]}
+            </div>
+            <div className="border-2 border-grey rounded-lg p-4  ">
+              O - {remoteGameState.players[1]}
+            </div>
+          </div>
+          <table className="tic-tac-toe-table ">
+            <tbody>
+              {remoteGameState.board.map((row, rowIndex) => (
+                <tr key={rowIndex}>
+                  {row.map((cellVal, cellIndex) => (
+                    <td key={cellIndex} className="tic-tac-toe-cell">
+                      <button
+                        className="w-12 h-12 bg-gray-200 text-gray-700 font-semibold py-2 px-4 rounded-full shadow-md hover:shadow-lg"
+                        onClick={() => cellPress(rowIndex, cellIndex)}
+                      >
+                        {cellVal === 1 ? 'O' : cellVal === -1 ? 'X' : null}
+                      </button>
+                    </td>
+                  ))}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
         <div>
           <NgButton />
         </div>

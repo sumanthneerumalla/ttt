@@ -1,3 +1,16 @@
+# 03/08/23
+- Before i finish the ui that displays turn information i'll have to update the db model to store the winner of the game in a separate column as well as the json
+- added the column, picked up some tech debt where i have to update the gamestate string as well as the column for this, but I will address it when i have some down time later. In the same step i will likely get rid of storing the game state as a string and commit to passing the GameState object from the front end and backend instead of using a string.
+ - After that i might consolidate the new game creation endpoint as well as the game update endpoint, not sure yet
+  - 
+
+# 03/07/23
+- i'll have to let the users know that a game is over when the server says so, and give them an option to move onto the next round
+- at the same time i want to also display who's turn it is and give each player a player number
+- added some divs to display who's turn it is to play, can check the win condition of the game state to also display if a player has made a winning move
+- at the same time, I can update the game record to store the winner of a game and just scan that table to get the leaderboard later
+
+
 # 03/04/23
 - resuming win detection with the algorithm from stack overflow
 - detects wins now, can render and play a game till a win is detected

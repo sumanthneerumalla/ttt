@@ -1,4 +1,4 @@
-import { GameMove, GameState, Board } from 'server/routers/post';
+import { GameMove, GameState } from 'server/routers/post';
 import { prisma } from 'server/prisma';
 
 async function getGameById(gameId: number) {
@@ -66,7 +66,7 @@ export async function processMove(
     return null; //invalid cell selection
   } else if (game.nextPlayer !== userId) {
     return null; //it's not this player's turn yet
-  } else if (game.roundCompleted){
+  } else if (game.winningPlayer) {
     return null; //game is over
   } else {
     const gameState = await updateGameState(move, game);
@@ -74,12 +74,12 @@ export async function processMove(
   }
 }
 
+//Takes the move, and apply it to the game in the database
 export async function updateGameState(move: GameMove, gameState: GameState) {
-  //need to take the move, and apply it to the game id in the database
   //will return the latest state of the game
 
   // eslint-disable-next-line prefer-const
-  let { board, turn, nextPlayer, players, roundCompleted } = gameState;
+  let { board, turn, nextPlayer, players } = gameState;
 
   if (turn % 2 == 0) {
     board[move.xMove][move.yMove] = -1;
@@ -87,23 +87,32 @@ export async function updateGameState(move: GameMove, gameState: GameState) {
     board[move.xMove][move.yMove] = 1;
   }
 
-  roundCompleted = isRoundComplete(board);
-  console.log('win detected', roundCompleted);
+  //winning player is stored in both its own column and the gameState json for now
+  const roundCompleted = isRoundComplete(board);
+  let winningPlayer = null;
+  if (roundCompleted) {
+    console.log('round completed on turn: ', turn);
+    winningPlayer = players[turn % players.length];
+  }
 
   turn += 1;
   nextPlayer = players[turn % players.length];
-  gameState = { board, turn, players, nextPlayer, roundCompleted };
+  gameState = { board, turn, players, nextPlayer, winningPlayer };
 
   const gameString = JSON.stringify(gameState);
+
+  const gameObjToStore = {
+    gameData: {
+      gameState: gameString,
+    },
+    winningPlayer: winningPlayer,
+  };
+
   await prisma.game.update({
     where: {
       id: move.gameId,
     },
-    data: {
-      gameData: {
-        gameState: gameString,
-      },
-    },
+    data: gameObjToStore,
   });
   return gameState;
 }
