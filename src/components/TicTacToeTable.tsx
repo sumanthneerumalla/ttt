@@ -1,6 +1,7 @@
 import { trpc } from '../utils/trpc';
 import { GameState, GameMove } from '../server/routers/post';
 import { useState } from 'react';
+import TurnInfo from './TurnInfo';
 
 const defaultGame: GameState = {
   board: [
@@ -53,14 +54,10 @@ export default function TicTacToeTable() {
     <div className="flex-1 md:h-screen">
       <section className="flex h-full flex-col bg-purple-700 p-4">
         <div className="flex flex-col space-y-4 justify-center items-center h-screen">
-          <div className="turn-info text-gray-300 flex space-x-4">
-            <div className="border-2 border-grey rounded-lg p-4  ">
-              X - {remoteGameState.players[0]}
-            </div>
-            <div className="border-2 border-grey rounded-lg p-4  ">
-              O - {remoteGameState.players[1]}
-            </div>
-          </div>
+          <TurnInfo
+            turn={remoteGameState.turn}
+            players={remoteGameState.players}
+          />
           <table className="tic-tac-toe-table ">
             <tbody>
               {remoteGameState.board.map((row, rowIndex) => (
