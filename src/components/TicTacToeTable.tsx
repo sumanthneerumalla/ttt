@@ -57,6 +57,7 @@ export default function TicTacToeTable() {
           <TurnInfo
             turn={remoteGameState.turn}
             players={remoteGameState.players}
+            winningPlayer={remoteGameState.winningPlayer}
           />
           <table className="tic-tac-toe-table ">
             <tbody>
